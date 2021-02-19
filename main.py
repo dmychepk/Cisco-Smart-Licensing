@@ -2,7 +2,6 @@ from flask import Flask, render_template, request, Response
 import time
 from netmiko import ConnectHandler
 from concurrent.futures import ThreadPoolExecutor
-import requests
 import logging
 from datetime import datetime
 import difflib
@@ -126,26 +125,28 @@ def home():
         password = request.form["password"]
         cssm_ip = request.form["cssm_ip"]
         token = request.form["token"]
+        dlc = request.form.get('dlc')
+        print(dlc)
         devices = request.form["devices"]
         connection_parameters = ConnectionParameters(username, password)
         my_devices = []
         for device in devices.split():
             my_devices.append(CiscoIOSDevice(device, connection_parameters))
-        return Response(generate(my_devices, token, cssm_ip), mimetype='text')
+        return Response(generate(my_devices, token, cssm_ip, dlc), mimetype='text')
     else:
         with open("smart_license_config.txt") as f:
             content = f.read()
             return render_template("index.html", configuration_file=content)
 
 
-def generate(my_devices, token, cssm_ip):
+def generate(my_devices, token, cssm_ip, dlc):
     with ThreadPoolExecutor(max_workers=25) as executor:
-        result = executor.map(smart_license_registration, my_devices, repeat(token), repeat(cssm_ip))
+        result = executor.map(smart_license_registration, my_devices, repeat(token), repeat(cssm_ip), repeat(dlc))
         for outcome in result:
             yield outcome
 
 
-def smart_license_registration(device, token, cssm_ip):
+def smart_license_registration(device, token, cssm_ip, dlc):
     if device.connect():
         device.check_status()
         if not device.registered:
@@ -154,15 +155,16 @@ def smart_license_registration(device, token, cssm_ip):
             device.register(token)
             device.wait_for_registration(seconds=120)
         if device.registered:
-            if device.dlc_supported:
-                if not device.dlc:
-                    device.run_dcl()
+            if dlc:
+                if device.dlc_supported:
+                    if not device.dlc:
+                        device.run_dcl()
         else:
             return f'{device.hostname} - FAILED to register\n'
         device.disconnect()
         return f'{device.hostname} - OK\n'
     else:
-        return f'{device.ip} - FAILED to CONNECT\n' # tested
+        return f'{device.ip} - FAILED to CONNECT\n'
 
 
 if __name__ == '__main__':

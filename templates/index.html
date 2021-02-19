@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CSSM On-Prem Device Registration</title>
+    <style>
+    table {
+        width: 100%;
+    }
+    td {
+        text-align: center;
+        vertical-align:top;
+    }
+    </style>
+</head>
+<body>
+<h1>Register your Devices to Cisco Smart Software Manager On-Prem</h1>
+<form action="#" method="post">
+    <table>
+        <tr>
+            <th>Credentials</th>
+            <th>Devices</th>
+            <th>Configuration</th>
+        </tr>
+        <tr>
+            <td>
+                <label for="uname">Username:</label><br>
+                <input type="text" id="uname" name="username"><br>
+
+                <label for="pass">Password:</label><br>
+                <input type="password" id="pass" name="password"><br><br>
+
+                <label for="cssm">CSSM On-Prem IP Address:</label><br>
+                <input type="text" id="cssm" name="cssm_ip"><br><br>
+
+                <label for="token">Token</label><br>
+                <input type="text" id="token" name="token"><br><br>
+
+                <input type="submit" value="Submit">
+            </td>
+            <td>
+                <textarea name="devices"></textarea>
+            </td>
+            <td style="text-align:left">
+                <pre>{{ configuration_file }}</pre>
+            </td>
+        </tr>
+    </table>
+</form>
+</body>
+</html>

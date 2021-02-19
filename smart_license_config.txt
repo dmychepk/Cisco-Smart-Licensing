@@ -1,0 +1,17 @@
+service call-home
+!
+call-home
+contact-email-addr sch-smart-licensing@cisco.com
+no http secure server-identity-check
+profile ”CiscoTAC-1”
+ no active
+profile SMART_LICENSE
+ reporting smart-licensing-data
+ destination transport-method http
+ destination address http https://{{ CSSM_On_Prem_IP_Address }}:443/Transportgateway/services/DeviceRequestHandle
+ destination preferred-msg-format xml
+ active
+!
+crypto pki trustpoint SLA-TrustPoint
+ revocation-check none
+!

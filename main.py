@@ -69,7 +69,7 @@ class CiscoIOSDevice:
         pre_check = self.show_run()
         self.__session.send_config_from_file(config_file='smart_license_config.txt')
         if self.http_client_source:
-            self.__session.send_config(f'ip http client source-interface {self.http_client_source}')
+            self.__session.send_config_set([f'ip http client source-interface {self.http_client_source}'])
         logging.info(f'{self.hostname} :: {self.ip} :: Configuration for Smart License is done :: {datetime.now()}')
         post_check = self.show_run()
         with open(f'{self.hostname}.html', 'w') as diff_file:
@@ -106,12 +106,15 @@ class CiscoIOSDevice:
 
     def http_client_source_interface(self, ip):
         interfaces = self.__session.send_command('show ip int br').splitlines()
-        next(interfaces)
-        for interface in interfaces:
-            result = self.__session.send_command(f'ping {ip} source {interface}')
-            if '!' in result:
-                self.http_client_source = interface
-                return interface
+        for interface_line in interfaces:
+            if not interface_line.startswith('Interface'):
+                interface, interface_status, *rest = interface_line.split()
+                interface = interface.strip()
+                if interface_status.strip() != 'unassigned':
+                    result = self.__session.send_command(f'ping {ip} source {interface}')
+                    if '!' in result:
+                        self.http_client_source = interface
+                        return interface
 
 
 app = Flask(__name__)

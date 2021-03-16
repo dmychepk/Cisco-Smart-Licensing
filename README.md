@@ -13,3 +13,5 @@ Script does the following:
 5. Configure device with _smart_license_config.txt_
 6. Wait for registration (120 seconds)
 7. if device supports DLC and DLC not performed -> run DLC
+
+Tested on Catalyst 3650, 3850, 9000
